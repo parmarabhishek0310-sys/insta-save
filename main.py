@@ -1,26 +1,27 @@
+import streamlit as st
 import instaloader
 
-# Instaloader की एक इंस्टेंस बनाएं
-L = instaloader.Instaloader()
+# Streamlit पेज की सेटिंग
+st.title("Insta Save - Instagram Downloader")
+st.write("किसी भी इंस्टाग्राम पोस्ट या रील का लिंक यहाँ डालें और डाउनलोड करें।")
 
-def download_instagram_post(post_url):
-    try:
-        # URL से शॉर्टकोड (Shortcode) निकालें
-        shortcode = post_url.split("/")[-2]
-        
-        # पोस्ट की जानकारी प्राप्त करें
-        post = instaloader.Post.from_shortcode(L.context, shortcode)
-        
-        # पोस्ट (फोटो या वीडियो) डाउनलोड करें
-        print(f"Downloading post from: {post.owner_username}")
-        L.download_post(post, target=f"{post.owner_username}_post")
-        print("Download complete!")
-        
-    except Exception as e:
-        print("Error occurred:", e)
+# यूजर से इनपुट लेने के लिए टेक्स्ट बॉक्स
+post_url = st.text_input("Enter Instagram Post / Reel URL:")
 
-if __name__ == "__main__":
-    # जिस इंस्टाग्राम पोस्ट/रील्स को डाउनलोड करना है, उसका URL यहाँ डालें
-    url = input("Enter Instagram Post / Reel URL: ")
-    download_instagram_post(url)
-    
+if st.button("Download"):
+    if post_url:
+        try:
+            L = instaloader.Instaloader()
+            # URL से शॉर्टकोड निकालें
+            shortcode = post_url.split("/")[-2]
+            
+            with st.spinner("Downloading... Please wait..."):
+                post = instaloader.Post.from_shortcode(L.context, shortcode)
+                L.download_post(post, target="instagram_media")
+            
+            st.success(f"Successfully downloaded from: {post.owner_username}")
+            
+        except Exception as e:
+            st.error(f"Error occurred: {e}")
+    else:
+        st.warning("Please enter a valid URL first!")
